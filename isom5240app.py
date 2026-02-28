@@ -14,7 +14,7 @@ image_name = "middleagedMan.jpg"
 image_name = Image.open(image_name).convert("RGB")
 
 # Classify age
-def age_predictions()
+def age_predictions():
   age_predictions = age_classifier(image_name)
   st.write(age_predictions)
   age_predictions = sorted(age_predictions, key=lambda x: x['score'], reverse=True)
