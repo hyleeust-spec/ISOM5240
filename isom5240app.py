@@ -1,5 +1,5 @@
 streamlit
-transformers<5.0.0
+!pip install "transformers<5.0.0"
 Pillow
 torch
 
