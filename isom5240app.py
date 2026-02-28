@@ -4,14 +4,6 @@ from PIL import Image
 
 def classifier():
   # Classify age
-  age_predictions = age_classifier(image_name)
-  st.write(age_predictions)
-  age_predictions = sorted(age_predictions, key=lambda x: x['score'], reverse=True)
-
-def main():
-  # Streamlit UI
-  st.header("Title: Age Classification using ViT")
-  
   # Load the age classification pipeline
   # The code below should be placed in the main part of the program
   
@@ -20,6 +12,16 @@ def main():
   
   image_name = "middleagedMan.jpg"
   image_name = Image.open(image_name).convert("RGB")
+  
+  age_predictions = age_classifier(image_name)
+  st.write(age_predictions)
+  age_predictions = sorted(age_predictions, key=lambda x: x['score'], reverse=True)
+
+def main():
+  # Streamlit UI
+  st.header("Title: Age Classification using ViT")
+  
+
   
   classifier()
   
