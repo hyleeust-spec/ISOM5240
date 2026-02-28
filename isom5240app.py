@@ -13,6 +13,8 @@ def age_classifier(image_file_name, models_name):
   image_name = image_file_name
   image_name = Image.open(image_name).convert("RGB")
 
+  age_predictions = age_classifier(image_name)
+
 
 def main():
   # Streamlit UI
@@ -20,7 +22,7 @@ def main():
   
   age_classifier("middleagedMan.jpg", "prithivMLmods/Age-Classification-SigLIP2")
   
-  age_predictions = age_classifier(image_name)
+
   st.write(age_predictions)
   age_predictions = sorted(age_predictions, key=lambda x: x['score'], reverse=True)
   
