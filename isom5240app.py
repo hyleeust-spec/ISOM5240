@@ -2,6 +2,8 @@ import streamlit as st
 from transformers import pipeline
 
 # Load the text classification model pipeline
+st.write("ISOM5240")
+
 classifier = pipeline("text-classification",model='isom5240ust/bert-base-uncased-emotion')
 
 # Streamlit application title
