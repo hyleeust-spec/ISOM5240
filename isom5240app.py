@@ -20,10 +20,8 @@ def age_classifier(image_file_name):
 def main():
   # Streamlit UI
   st.header("Title: Age Classification using ViT")
-
-  image_file_name = "middleagedMan.jpg"
   
-  age_classifier()
+  age_classifier("middleagedMan.jpg")
   
   # Display results
   st.write("Predicted Age Range:")
