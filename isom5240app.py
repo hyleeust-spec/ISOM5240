@@ -4,15 +4,12 @@ import streamlit as st
 from PIL import Image
 from transformers import pipeline
 
-FILE_PATH = "28car_tesla_sold_all_pages.xlsx"
+FILE_PATH = "28car_tesla_sold_all_pages-2.xlsx"
 
 
-# ----------------------------
-# Load resale data
-# ----------------------------
 @st.cache_data
 def load_data(file_path):
-    df = pd.read_excel(file_path)
+    df = pd.read_excel(file_path, engine="openpyxl")
 
     df.columns = df.columns.str.strip().str.lower()
 
@@ -31,9 +28,6 @@ def load_data(file_path):
     return df
 
 
-# ----------------------------
-# Load AI models
-# ----------------------------
 @st.cache_resource
 def load_damage_classifier():
     return pipeline(
@@ -58,9 +52,6 @@ def load_tesla_model_classifier():
     )
 
 
-# ----------------------------
-# Image helper
-# ----------------------------
 def save_uploaded_file_temporarily(uploaded_file):
     suffix = "." + uploaded_file.name.split(".")[-1] if "." in uploaded_file.name else ".jpg"
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
@@ -68,7 +59,7 @@ def save_uploaded_file_temporarily(uploaded_file):
         return tmp_file.name
 
 
-def import_image(uploaded_file):
+def validate_image(uploaded_file):
     try:
         img = Image.open(uploaded_file)
         img.verify()
@@ -78,9 +69,6 @@ def import_image(uploaded_file):
         return False
 
 
-# ----------------------------
-# AI inference functions
-# ----------------------------
 def check_car_damage(valid_path):
     damage_classifier = load_damage_classifier()
 
@@ -111,9 +99,6 @@ def tesla_model_type(valid_path):
     return detected_tesla_model["label"], detected_tesla_model
 
 
-# ----------------------------
-# Mapping functions
-# ----------------------------
 def normalize_detected_model(model_label):
     label = str(model_label).strip().upper()
 
@@ -159,9 +144,6 @@ def get_price_range(df, model_name, year):
     return min_price, max_price, matched_rows
 
 
-# ----------------------------
-# Streamlit UI
-# ----------------------------
 def main():
     st.set_page_config(page_title="Tesla Resell Price Finder", layout="wide")
     st.title("Tesla Resell Price Finder")
@@ -172,17 +154,15 @@ def main():
         df = load_data(FILE_PATH)
     except Exception as e:
         st.error(f"Failed to load Excel data: {e}")
+        st.info("Install the missing dependency with: pip install openpyxl")
         return
 
-    uploaded_file = st.file_uploader(
-        "Upload a car image",
-        type=["jpg", "jpeg", "png"]
-    )
+    uploaded_file = st.file_uploader("Upload a car image", type=["jpg", "jpeg", "png"])
 
     if uploaded_file is None:
         return
 
-    if not import_image(uploaded_file):
+    if not validate_image(uploaded_file):
         st.error("Invalid image file.")
         return
 
