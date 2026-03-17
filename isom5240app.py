@@ -4,7 +4,7 @@ import streamlit as st
 from PIL import Image
 from transformers import pipeline
 
-FILE_PATH = "28car_tesla_sold_all_pages-2.xlsx"
+FILE_PATH = "28car_tesla_sold_all_pages.xlsx"
 
 
 @st.cache_data
@@ -154,7 +154,7 @@ def main():
         df = load_data(FILE_PATH)
     except Exception as e:
         st.error(f"Failed to load Excel data: {e}")
-        st.info("Install the missing dependency with: pip install openpyxl")
+        st.info("Make sure openpyxl is in requirements.txt and the Excel file is in the repo.")
         return
 
     uploaded_file = st.file_uploader("Upload a car image", type=["jpg", "jpeg", "png"])
