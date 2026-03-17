@@ -124,14 +124,22 @@ def tesla_model_type(valid_path):
 def normalize_detected_model(model_label):
     label = str(model_label).strip().upper()
 
-    if "MODEL Y" in label or label == "Y":
-        return "Model Y"
-    if "MODEL 3" in label or label == "3":
-        return "Model 3"
-    if "MODEL S" in label or label == "S":
-        return "Model S"
-    if "MODEL X" in label or label == "X":
-        return "Model X"
+    alias_map = {
+        "MODEL E": "Model 3",
+        "E": "Model 3",
+        "MODEL 3": "Model 3",
+        "3": "Model 3",
+        "MODEL Y": "Model Y",
+        "Y": "Model Y",
+        "MODEL S": "Model S",
+        "S": "Model S",
+        "MODEL X": "Model X",
+        "X": "Model X",
+    }
+
+    for key, value in alias_map.items():
+        if key in label or label == key:
+            return value
 
     return model_label
 
