@@ -11,12 +11,34 @@ FILE_PATH = "28car_tesla_sold_all_pages.xlsx"
 def load_data(file_path):
     df = pd.read_excel(file_path, engine="openpyxl")
 
-    df.columns = df.columns.str.strip().str.lower()
+    raw_columns = df.columns.tolist()
+
+    df.columns = (
+        df.columns.astype(str)
+        .str.strip()
+        .str.lower()
+        .str.replace(" ", "", regex=False)
+    )
+
+    column_map = {}
+    for col in df.columns:
+        if "model" == col or "model" in col:
+            column_map[col] = "model"
+        elif "year" == col or "year" in col:
+            column_map[col] = "year"
+        elif "pricehkd" == col or ("price" in col and "hkd" in col):
+            column_map[col] = "pricehkd"
+
+    df = df.rename(columns=column_map)
 
     required_columns = ["model", "year", "pricehkd"]
-    for col in required_columns:
-        if col not in df.columns:
-            raise ValueError(f"Missing required column: {col}")
+    missing_columns = [col for col in required_columns if col not in df.columns]
+
+    if missing_columns:
+        raise ValueError(
+            f"Missing required column(s): {missing_columns}. "
+            f"Detected columns: {raw_columns}"
+        )
 
     df["model"] = df["model"].astype(str).str.strip()
     df["year"] = pd.to_numeric(df["year"], errors="coerce")
@@ -25,7 +47,7 @@ def load_data(file_path):
     df = df.dropna(subset=["model", "year", "pricehkd"])
     df["year"] = df["year"].astype(int)
 
-    return df
+    return df, raw_columns
 
 
 @st.cache_resource
@@ -151,11 +173,13 @@ def main():
     st.write("Upload a car image, detect the Tesla model, choose a year, and get the resale price range.")
 
     try:
-        df = load_data(FILE_PATH)
+        df, raw_columns = load_data(FILE_PATH)
     except Exception as e:
         st.error(f"Failed to load Excel data: {e}")
-        st.info("Make sure openpyxl is in requirements.txt and the Excel file is in the repo.")
         return
+
+    with st.expander("Show detected Excel columns"):
+        st.write(raw_columns)
 
     uploaded_file = st.file_uploader("Upload a car image", type=["jpg", "jpeg", "png"])
 
@@ -221,28 +245,4 @@ def main():
         if st.button("Get Price Range"):
             detected_model = st.session_state["detected_model"]
 
-            min_price, max_price, matched_rows = get_price_range(df, detected_model, selected_year)
-
-            st.subheader("Resale Price Result")
-            st.write(f"Model: {detected_model}")
-            st.write(f"Year: {selected_year}")
-
-            if matched_rows.empty:
-                st.warning("No matching rows found.")
-                return
-
-            st.write(f"Matching records: {len(matched_rows)}")
-            st.write(f"Minimum price: HKD {int(min_price):,}")
-            st.write(f"Maximum price: HKD {int(max_price):,}")
-
-            st.subheader("Matching Records")
-            st.dataframe(
-                matched_rows[["model", "year", "pricehkd"]]
-                .sort_values(by="pricehkd")
-                .reset_index(drop=True),
-                use_container_width=True
-            )
-
-
-if __name__ == "__main__":
-    main()
+            min_price, max_p
