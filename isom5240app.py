@@ -4,7 +4,7 @@ import streamlit as st
 from PIL import Image
 from transformers import pipeline
 
-FILE_PATH = "28car_tesla_sold_all_pages.xlsx"
+FILE_PATH = "28car_tesla_sold_all_pages-2.xlsx"
 
 
 @st.cache_data
@@ -245,4 +245,28 @@ def main():
         if st.button("Get Price Range"):
             detected_model = st.session_state["detected_model"]
 
-            min_price, max_p
+            min_price, max_price, matched_rows = get_price_range(df, detected_model, selected_year)
+
+            st.subheader("Resale Price Result")
+            st.write(f"Model: {detected_model}")
+            st.write(f"Year: {selected_year}")
+
+            if matched_rows.empty:
+                st.warning("No matching rows found.")
+                return
+
+            st.write(f"Matching records: {len(matched_rows)}")
+            st.write(f"Minimum price: HKD {int(min_price):,}")
+            st.write(f"Maximum price: HKD {int(max_price):,}")
+
+            st.subheader("Matching Records")
+            st.dataframe(
+                matched_rows[["model", "year", "pricehkd"]]
+                .sort_values(by="pricehkd")
+                .reset_index(drop=True),
+                use_container_width=True
+            )
+
+
+if __name__ == "__main__":
+    main()
