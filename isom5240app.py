@@ -5,7 +5,7 @@ import streamlit as st
 from PIL import Image
 from transformers import pipeline
 
-FILE_PATH = "28car_tesla_sold_all_pages-2.xlsx"
+FILE_PATH = "28car_tesla_sold_all_pages.xlsx"
 
 
 @st.cache_data
