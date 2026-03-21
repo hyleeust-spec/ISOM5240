@@ -63,7 +63,7 @@ def load_damage_classifier():
 def load_brand_classifier():
     return pipeline(
         "image-classification",
-        model="chanc031965/Tesla_Detection"
+        model="zjs81/Electric-Car-Brand-Classifier"
     )
 
 
@@ -276,12 +276,14 @@ def main():
                 "Your car is not a Tesla car and is not eligible for resale.",
                 icon="⚠️"
             )
+            st.write(f"Confidence: {result['brand_result']['score']:.4f}")
             return
         else:
             st.success(
                 "Your car is a Tesla and is eligible for resale.",
                 icon="✅"
             )
+            st.write(f"Confidence: {result['brand_result']['score']:.4f}")
 
         st.subheader("Tesla Model Detection")
         st.write(f"Detected model label: {result['detected_model_raw']}")
