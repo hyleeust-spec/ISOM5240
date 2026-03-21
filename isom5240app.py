@@ -120,8 +120,8 @@ def car_brand(valid_path):
 
 
 def is_tesla_label(label):
-    normalized = str(label).strip().lower().replace("_", " ").replace("-", " ")
-    return "tesla" in normalized
+    normalized = str(label).strip().lower().replace("-", "_").replace(" ", "_")
+    return normalized == "tesla"
 
 
 def tesla_model_type(valid_path):
