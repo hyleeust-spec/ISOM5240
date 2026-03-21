@@ -244,10 +244,6 @@ def main():
         st.error("Invalid image file.")
         return
 
-    image = Image.open(uploaded_file)
-    st.image(image, caption="Uploaded image", use_container_width=True)
-    uploaded_file.seek(0)
-
     current_file_hash = get_file_hash(uploaded_file)
 
     if st.session_state.get("last_file_hash") != current_file_hash:
@@ -259,62 +255,70 @@ def main():
 
     result = st.session_state.get("analysis_result")
 
-    if not result:
-        return
+    left_col, right_col = st.columns([1, 1.2], gap="large")
 
-    st.subheader("Damage Detection")
-    st.write(f"Result: {result['damage_result']}")
-    st.write(f"Top label: {result['damage_info']['label']}")
-    st.write(f"Confidence: {result['damage_info']['score']:.4f}")
+    with left_col:
+        uploaded_file.seek(0)
+        image = Image.open(uploaded_file)
+        st.image(image, caption="Uploaded image", use_container_width=True)
 
-    if result["status"] == "damaged":
-        st.warning("This car is damaged. It may not be eligible for resale.")
-        return
+    with right_col:
+        if not result:
+            return
 
-    st.subheader("Brand Detection")
-    st.write(f"Detected brand: {result['brand_result']['label']}")
-    st.write(f"Confidence: {result['brand_result']['score']:.4f}")
+        st.subheader("Damage Detection")
+        st.write(f"Result: {result['damage_result']}")
+        st.write(f"Top label: {result['damage_info']['label']}")
+        st.write(f"Confidence: {result['damage_info']['score']:.4f}")
 
-    if result["status"] == "not_tesla":
-        st.error("Your car is not a Tesla car. It is not eligible for resale.")
-        return
+        if result["status"] == "damaged":
+            st.warning("This car is damaged. It may not be eligible for resale.")
+            return
 
-    st.subheader("Tesla Model Detection")
-    st.write(f"Detected model label: {result['detected_model_raw']}")
-    st.write(f"Mapped model: {result['detected_model']}")
-    st.write(f"Confidence: {result['model_info']['score']:.4f}")
+        st.subheader("Brand Detection")
+        st.write(f"Detected brand: {result['brand_result']['label']}")
+        st.write(f"Confidence: {result['brand_result']['score']:.4f}")
 
-    if not result["available_years"]:
-        st.warning(f"No available years found in the resale file for {result['detected_model']}.")
-        return
+        if result["status"] == "not_tesla":
+            st.error("Your car is not a Tesla car. It is not eligible for resale.")
+            return
 
-    selected_year = st.selectbox(
-        "Select year",
-        options=result["available_years"],
-        key="selected_year"
-    )
+        st.subheader("Tesla Model Detection")
+        st.write(f"Detected model label: {result['detected_model_raw']}")
+        st.write(f"Mapped model: {result['detected_model']}")
+        st.write(f"Confidence: {result['model_info']['score']:.4f}")
 
-    min_price, max_price, matched_rows = get_price_range(df, result["detected_model"], selected_year)
+        if not result["available_years"]:
+            st.warning(f"No available years found in the resale file for {result['detected_model']}.")
+            return
 
-    st.subheader("Resale Price Result")
-    st.write(f"Model: {result['detected_model']}")
-    st.write(f"Year: {selected_year}")
+        selected_year = st.selectbox(
+            "Select year",
+            options=result["available_years"],
+            key="selected_year"
+        )
 
-    if matched_rows.empty:
-        st.warning("No matching rows found.")
-        return
+        min_price, max_price, matched_rows = get_price_range(df, result["detected_model"], selected_year)
 
-    st.write(f"Matching records: {len(matched_rows)}")
-    st.write(f"Minimum price: HKD {int(min_price):,}")
-    st.write(f"Maximum price: HKD {int(max_price):,}")
+        st.subheader("Resale Price Result")
+        st.write(f"Model: {result['detected_model']}")
+        st.write(f"Year: {selected_year}")
 
-    st.subheader("Matching Records")
-    st.dataframe(
-        matched_rows[["model", "year", "pricehkd"]]
-        .sort_values(by="pricehkd")
-        .reset_index(drop=True),
-        use_container_width=True
-    )
+        if matched_rows.empty:
+            st.warning("No matching rows found.")
+            return
+
+        st.write(f"Matching records: {len(matched_rows)}")
+        st.write(f"Minimum price: HKD {int(min_price):,}")
+        st.write(f"Maximum price: HKD {int(max_price):,}")
+
+        with st.expander("Show matching records"):
+            st.dataframe(
+                matched_rows[["model", "year", "pricehkd"]]
+                .sort_values(by="pricehkd")
+                .reset_index(drop=True),
+                use_container_width=True
+            )
 
 
 if __name__ == "__main__":
