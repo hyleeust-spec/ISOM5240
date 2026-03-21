@@ -4,7 +4,7 @@ import streamlit as st
 from PIL import Image
 from transformers import pipeline
 
-FILE_PATH = "28car_tesla_sold_all_pages.xlsx"
+FILE_PATH = "28car_tesla_sold_all_pages-2.xlsx"
 
 
 @st.cache_data
@@ -22,11 +22,11 @@ def load_data(file_path):
 
     column_map = {}
     for col in df.columns:
-        if "model" == col or "model" in col:
+        if col == "model" or "model" in col:
             column_map[col] = "model"
-        elif "year" == col or "year" in col:
+        elif col == "year" or "year" in col:
             column_map[col] = "year"
-        elif "pricehkd" == col or ("price" in col and "hkd" in col):
+        elif col == "pricehkd" or ("price" in col and "hkd" in col):
             column_map[col] = "pricehkd"
 
     df = df.rename(columns=column_map)
@@ -123,25 +123,30 @@ def tesla_model_type(valid_path):
 
 def normalize_detected_model(model_label):
     label = str(model_label).strip().upper()
+    label = label.replace("-", "_").replace(" ", "_")
 
-    alias_map = {
-        "MODEL E": "Model 3",
-        "E": "Model 3",
-        "MODEL 3": "Model 3",
+    mapping = {
+        "MODEL_3": "Model 3",
+        "MODEL3": "Model 3",
         "3": "Model 3",
-        "MODEL Y": "Model Y",
+        "MODEL_E": "Model 3",
+        "MODELE": "Model 3",
+        "E": "Model 3",
+
+        "MODEL_Y": "Model Y",
+        "MODELY": "Model Y",
         "Y": "Model Y",
-        "MODEL S": "Model S",
+
+        "MODEL_S": "Model S",
+        "MODELS": "Model S",
         "S": "Model S",
-        "MODEL X": "Model X",
+
+        "MODEL_X": "Model X",
+        "MODELX": "Model X",
         "X": "Model X",
     }
 
-    for key, value in alias_map.items():
-        if key in label or label == key:
-            return value
-
-    return model_label
+    return mapping.get(label, model_label)
 
 
 def get_available_years(df, model_name):
@@ -184,6 +189,7 @@ def main():
         df, raw_columns = load_data(FILE_PATH)
     except Exception as e:
         st.error(f"Failed to load Excel data: {e}")
+        st.info("Make sure the Excel file exists in the repo and openpyxl is installed.")
         return
 
     with st.expander("Show detected Excel columns"):
