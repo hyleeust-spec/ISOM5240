@@ -48,7 +48,7 @@ def load_data(file_path):
     df = df.dropna(subset=["model", "year", "pricehkd"])
     df["year"] = df["year"].astype(int)
 
-    return df, raw_columns
+    return df
 
 
 @st.cache_resource
@@ -101,18 +101,15 @@ def get_file_hash(uploaded_file):
 
 def check_car_damage(valid_path):
     damage_classifier = load_damage_classifier()
-
     result = damage_classifier(
         valid_path,
         candidate_labels=["a damaged car", "an undamaged car"]
     )
-
     top_result = max(result, key=lambda x: x["score"])
 
     if top_result["label"] == "an undamaged car":
-        return "Your car is undamaged", top_result
-    else:
-        return "Your car is damaged", top_result
+        return "Your car is undamaged"
+    return "Your car is damaged"
 
 
 def car_brand(valid_path):
@@ -140,15 +137,12 @@ def normalize_detected_model(model_label):
         "MODEL_E": "Model 3",
         "MODELE": "Model 3",
         "E": "Model 3",
-
         "MODEL_Y": "Model Y",
         "MODELY": "Model Y",
         "Y": "Model Y",
-
         "MODEL_S": "Model S",
         "MODELS": "Model S",
         "S": "Model S",
-
         "MODEL_X": "Model X",
         "MODELX": "Model X",
         "X": "Model X",
@@ -159,7 +153,6 @@ def normalize_detected_model(model_label):
 
 def get_available_years(df, model_name):
     matched = df[df["model"].str.upper().str.contains(model_name.upper(), na=False)]
-
     years = (
         matched["year"]
         .dropna()
@@ -168,7 +161,6 @@ def get_available_years(df, model_name):
         .unique()
         .tolist()
     )
-
     return years
 
 
@@ -183,19 +175,17 @@ def get_price_range(df, model_name, year):
 
     min_price = matched_rows["pricehkd"].min()
     max_price = matched_rows["pricehkd"].max()
-
     return min_price, max_price, matched_rows
 
 
 def analyze_uploaded_image(uploaded_file, df):
     temp_path = save_uploaded_file_temporarily(uploaded_file)
 
-    damage_result, damage_info = check_car_damage(temp_path)
+    damage_result = check_car_damage(temp_path)
     if damage_result == "Your car is damaged":
         return {
             "status": "damaged",
-            "damage_result": damage_result,
-            "damage_info": damage_info
+            "damage_result": damage_result
         }
 
     brand_result = car_brand(temp_path)
@@ -203,7 +193,6 @@ def analyze_uploaded_image(uploaded_file, df):
         return {
             "status": "not_tesla",
             "damage_result": damage_result,
-            "damage_info": damage_info,
             "brand_result": brand_result
         }
 
@@ -214,7 +203,6 @@ def analyze_uploaded_image(uploaded_file, df):
     return {
         "status": "success",
         "damage_result": damage_result,
-        "damage_info": damage_info,
         "brand_result": brand_result,
         "detected_model_raw": detected_model_raw,
         "detected_model": detected_model,
@@ -229,10 +217,9 @@ def main():
     st.write("Upload a car image, and the app will automatically detect the Tesla model and show the price range.")
 
     try:
-        df, raw_columns = load_data(FILE_PATH)
+        df = load_data(FILE_PATH)
     except Exception as e:
         st.error(f"Failed to load Excel data: {e}")
-        st.info("Make sure the Excel file exists in the repo and openpyxl is installed.")
         return
 
     uploaded_file = st.file_uploader("Upload a car image", type=["jpg", "jpeg", "png"])
@@ -267,9 +254,7 @@ def main():
             return
 
         st.subheader("Damage Detection")
-        st.write(f"Result: {result['damage_result']}")
-        st.write(f"Top label: {result['damage_info']['label']}")
-        st.write(f"Confidence: {result['damage_info']['score']:.4f}")
+        st.info(f"Result: {result['damage_result']}")
 
         if result["status"] == "damaged":
             st.warning("This car is damaged. It may not be eligible for resale.")
@@ -304,15 +289,15 @@ def main():
             min_price, max_price, matched_rows = get_price_range(df, result["detected_model"], selected_year)
 
             st.subheader("Resale Price Result")
-            st.write(f"Model: {result['detected_model']}")
-            st.write(f"Year: {selected_year}")
 
             if matched_rows.empty:
                 st.warning("No matching rows found.")
                 return
 
+            st.write(f"Model: {result['detected_model']}")
+            st.write(f"Year: {selected_year}")
             st.write(f"Matching records: {len(matched_rows)}")
-            st.success(f"Price range: HKD {int(min_price):,} - {int(max_price):,}")
+            st.success(f"Price range: HKD {int(min_price):,} - {int(max_price):,}", icon="✅")
 
 
 if __name__ == "__main__":
