@@ -312,7 +312,7 @@ def main():
                 return
 
             st.write(f"Matching records: {len(matched_rows)}")
-            st.write(f"Price range: HKD {int(min_price):,} - {int(max_price):,}")
+            st.success(f"Price range: HKD {int(min_price):,} - {int(max_price):,}")
 
 
 if __name__ == "__main__":
