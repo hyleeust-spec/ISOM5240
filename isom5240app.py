@@ -274,7 +274,8 @@ def main():
             )
             return
         else:
-            st.success(f"Detected brand: {result['brand_result']['label']}", icon="✅")
+            st.success(f"Your car is from Tesla and eligable for reslae
+            ", icon="✅")
 
         st.subheader("Tesla Model Detection")
         st.write(f"Detected model label: {result['detected_model_raw']}")
