@@ -63,7 +63,7 @@ def load_damage_classifier():
 def load_brand_classifier():
     return pipeline(
         "image-classification",
-        model="chanc031965/Tesla_Detection"
+        model="zjs81/Electric-Car-Brand-Classifier"
     )
 
 
