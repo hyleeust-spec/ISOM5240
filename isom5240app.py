@@ -263,18 +263,25 @@ def main():
             )
             return
         else:
-            st.success("Your car pass the Damage Detection Validation successfully", icon="✅")
+            st.success(
+                "Your car passed the Damage Detection Validation successfully.",
+                icon="✅"
+            )
 
         st.subheader("Brand Detection")
 
         if result["status"] == "not_tesla":
             st.warning(
-                "Your car failed the Brand Detection Validation. It is not a Tesla car and not eligible for resale.",
+                "Your car failed the Brand Detection Validation.\n"
+                "Your car is not a Tesla car and is not eligible for resale.",
                 icon="⚠️"
             )
             return
         else:
-            st.success(f"Your car is from Tesla and eligable for resale", icon="✅")
+            st.success(
+                "Your car is a Tesla and is eligible for resale.",
+                icon="✅"
+            )
 
         st.subheader("Tesla Model Detection")
         st.write(f"Detected model label: {result['detected_model_raw']}")
