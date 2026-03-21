@@ -315,14 +315,6 @@ def main():
             st.write(f"Minimum price: HKD {int(min_price):,}")
             st.write(f"Maximum price: HKD {int(max_price):,}")
 
-            with st.expander("Show matching records"):
-                st.dataframe(
-                    matched_rows[["model", "year", "pricehkd"]]
-                    .sort_values(by="pricehkd")
-                    .reset_index(drop=True),
-                    use_container_width=True
-                )
-
 
 if __name__ == "__main__":
     main()
