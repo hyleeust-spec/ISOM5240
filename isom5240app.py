@@ -269,8 +269,7 @@ def main():
 
         if result["status"] == "not_tesla":
             st.warning(
-                "Your car failed the Brand Detection Validation.\n"
-                "Your car is not a Tesla car. It is not eligible for resale.",
+                "Your car failed the Brand Detection Validation as it is not a Tesla car. It is not eligible for resale.",
                 icon="⚠️"
             )
             return
