@@ -256,8 +256,11 @@ def main():
         st.subheader("Damage Detection")
 
         if result["status"] == "damaged":
-            st.warning("Your car failed the Damage Detection Validation.", icon="⚠️")
-            st.warning("This car is damaged. It may not be eligible for resale.")
+            st.warning(
+                "Your car failed the Damage Detection Validation.\n"
+                "This car is damaged. It may not be eligible for resale.",
+                icon="⚠️"
+            )
             return
         else:
             st.success("Your car pass the Damage Detection Validation successfully", icon="✅")
@@ -265,8 +268,11 @@ def main():
         st.subheader("Brand Detection")
 
         if result["status"] == "not_tesla":
-            st.warning("Your car failed the Brand Detection Validation.", icon="⚠️")
-            st.warning("Your car is not a Tesla car. It is not eligible for resale.")
+            st.warning(
+                "Your car failed the Brand Detection Validation.\n"
+                "Your car is not a Tesla car. It is not eligible for resale.",
+                icon="⚠️"
+            )
             return
         else:
             st.success(f"Detected brand: {result['brand_result']['label']}", icon="✅")
