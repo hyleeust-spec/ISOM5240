@@ -1,3 +1,4 @@
+import hashlib
 import tempfile
 import pandas as pd
 import streamlit as st
@@ -91,6 +92,13 @@ def validate_image(uploaded_file):
         return False
 
 
+def get_file_hash(uploaded_file):
+    uploaded_file.seek(0)
+    file_bytes = uploaded_file.getvalue()
+    uploaded_file.seek(0)
+    return hashlib.md5(file_bytes).hexdigest()
+
+
 def check_car_damage(valid_path):
     damage_classifier = load_damage_classifier()
 
@@ -179,11 +187,46 @@ def get_price_range(df, model_name, year):
     return min_price, max_price, matched_rows
 
 
+def analyze_uploaded_image(uploaded_file, df):
+    temp_path = save_uploaded_file_temporarily(uploaded_file)
+
+    damage_result, damage_info = check_car_damage(temp_path)
+    if damage_result == "Your car is damaged":
+        return {
+            "status": "damaged",
+            "damage_result": damage_result,
+            "damage_info": damage_info
+        }
+
+    brand_result = car_brand(temp_path)
+    if brand_result["label"] != "Tesla Electric Car":
+        return {
+            "status": "not_tesla",
+            "damage_result": damage_result,
+            "damage_info": damage_info,
+            "brand_result": brand_result
+        }
+
+    detected_model_raw, model_info = tesla_model_type(temp_path)
+    detected_model = normalize_detected_model(detected_model_raw)
+    available_years = get_available_years(df, detected_model)
+
+    return {
+        "status": "success",
+        "damage_result": damage_result,
+        "damage_info": damage_info,
+        "brand_result": brand_result,
+        "detected_model_raw": detected_model_raw,
+        "detected_model": detected_model,
+        "model_info": model_info,
+        "available_years": available_years
+    }
+
+
 def main():
     st.set_page_config(page_title="Tesla Resell Price Finder", layout="wide")
     st.title("Tesla Resell Price Finder")
-
-    st.write("Upload a car image, detect the Tesla model, choose a year, and get the resale price range.")
+    st.write("Upload a car image, and the app will automatically detect the Tesla model and show the price range.")
 
     try:
         df, raw_columns = load_data(FILE_PATH)
@@ -191,9 +234,6 @@ def main():
         st.error(f"Failed to load Excel data: {e}")
         st.info("Make sure the Excel file exists in the repo and openpyxl is installed.")
         return
-
-    with st.expander("Show detected Excel columns"):
-        st.write(raw_columns)
 
     uploaded_file = st.file_uploader("Upload a car image", type=["jpg", "jpeg", "png"])
 
@@ -208,78 +248,73 @@ def main():
     st.image(image, caption="Uploaded image", use_container_width=True)
     uploaded_file.seek(0)
 
-    if st.button("Analyze Car"):
-        with st.spinner("Analyzing image..."):
-            temp_path = save_uploaded_file_temporarily(uploaded_file)
+    current_file_hash = get_file_hash(uploaded_file)
 
-            damage_result, damage_info = check_car_damage(temp_path)
-            st.subheader("Damage Detection")
-            st.write(f"Result: {damage_result}")
-            st.write(f"Top label: {damage_info['label']}")
-            st.write(f"Confidence: {damage_info['score']:.4f}")
+    if st.session_state.get("last_file_hash") != current_file_hash:
+        with st.spinner("Analyzing image automatically..."):
+            analysis_result = analyze_uploaded_image(uploaded_file, df)
+            st.session_state["last_file_hash"] = current_file_hash
+            st.session_state["analysis_result"] = analysis_result
+            st.session_state.pop("selected_year", None)
 
-            if damage_result == "Your car is damaged":
-                st.warning("This car is damaged. It may not be eligible for resale.")
-                return
+    result = st.session_state.get("analysis_result")
 
-            brand_result = car_brand(temp_path)
-            st.subheader("Brand Detection")
-            st.write(f"Detected brand: {brand_result['label']}")
-            st.write(f"Confidence: {brand_result['score']:.4f}")
+    if not result:
+        return
 
-            if brand_result["label"] != "Tesla Electric Car":
-                st.error("Your car is not a Tesla car. It is not eligible for resale.")
-                return
+    st.subheader("Damage Detection")
+    st.write(f"Result: {result['damage_result']}")
+    st.write(f"Top label: {result['damage_info']['label']}")
+    st.write(f"Confidence: {result['damage_info']['score']:.4f}")
 
-            detected_model_raw, model_info = tesla_model_type(temp_path)
-            detected_model = normalize_detected_model(detected_model_raw)
+    if result["status"] == "damaged":
+        st.warning("This car is damaged. It may not be eligible for resale.")
+        return
 
-            st.subheader("Tesla Model Detection")
-            st.write(f"Detected model label: {detected_model_raw}")
-            st.write(f"Mapped model: {detected_model}")
-            st.write(f"Confidence: {model_info['score']:.4f}")
+    st.subheader("Brand Detection")
+    st.write(f"Detected brand: {result['brand_result']['label']}")
+    st.write(f"Confidence: {result['brand_result']['score']:.4f}")
 
-            available_years = get_available_years(df, detected_model)
+    if result["status"] == "not_tesla":
+        st.error("Your car is not a Tesla car. It is not eligible for resale.")
+        return
 
-            if not available_years:
-                st.warning(f"No available years found in the resale file for {detected_model}.")
-                return
+    st.subheader("Tesla Model Detection")
+    st.write(f"Detected model label: {result['detected_model_raw']}")
+    st.write(f"Mapped model: {result['detected_model']}")
+    st.write(f"Confidence: {result['model_info']['score']:.4f}")
 
-            st.session_state["detected_model"] = detected_model
-            st.session_state["available_years"] = available_years
+    if not result["available_years"]:
+        st.warning(f"No available years found in the resale file for {result['detected_model']}.")
+        return
 
-    if "detected_model" in st.session_state and "available_years" in st.session_state:
-        st.subheader("Year Selection")
+    selected_year = st.selectbox(
+        "Select year",
+        options=result["available_years"],
+        key="selected_year"
+    )
 
-        selected_year = st.selectbox(
-            "Select year",
-            options=st.session_state["available_years"]
-        )
+    min_price, max_price, matched_rows = get_price_range(df, result["detected_model"], selected_year)
 
-        if st.button("Get Price Range"):
-            detected_model = st.session_state["detected_model"]
+    st.subheader("Resale Price Result")
+    st.write(f"Model: {result['detected_model']}")
+    st.write(f"Year: {selected_year}")
 
-            min_price, max_price, matched_rows = get_price_range(df, detected_model, selected_year)
+    if matched_rows.empty:
+        st.warning("No matching rows found.")
+        return
 
-            st.subheader("Resale Price Result")
-            st.write(f"Model: {detected_model}")
-            st.write(f"Year: {selected_year}")
+    st.write(f"Matching records: {len(matched_rows)}")
+    st.write(f"Minimum price: HKD {int(min_price):,}")
+    st.write(f"Maximum price: HKD {int(max_price):,}")
 
-            if matched_rows.empty:
-                st.warning("No matching rows found.")
-                return
-
-            st.write(f"Matching records: {len(matched_rows)}")
-            st.write(f"Minimum price: HKD {int(min_price):,}")
-            st.write(f"Maximum price: HKD {int(max_price):,}")
-
-            st.subheader("Matching Records")
-            st.dataframe(
-                matched_rows[["model", "year", "pricehkd"]]
-                .sort_values(by="pricehkd")
-                .reset_index(drop=True),
-                use_container_width=True
-            )
+    st.subheader("Matching Records")
+    st.dataframe(
+        matched_rows[["model", "year", "pricehkd"]]
+        .sort_values(by="pricehkd")
+        .reset_index(drop=True),
+        use_container_width=True
+    )
 
 
 if __name__ == "__main__":
