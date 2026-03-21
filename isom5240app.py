@@ -254,11 +254,13 @@ def main():
             return
 
         st.subheader("Damage Detection")
-        st.info(f"Result: {result['damage_result']}")
 
         if result["status"] == "damaged":
+            st.warning("Your car failed the Damage Detection Validation.", icon="⚠️")
             st.warning("This car is damaged. It may not be eligible for resale.")
             return
+        else:
+            st.success("Your car pass the Damage Detection Validation successfully", icon="✅")
 
         st.subheader("Brand Detection")
         st.write(f"Detected brand: {result['brand_result']['label']}")
