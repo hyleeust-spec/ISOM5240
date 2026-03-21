@@ -281,16 +281,12 @@ def main():
                 "Your car is not a Tesla car and is not eligible for resale.",
                 icon="⚠️"
             )
-            st.write(f"Confidence: {result['brand_result']['score']:.4f}")
-            st.write(f"Detected brand label: {result['brand_result']['label']}")
             return
         else:
             st.success(
                 "Your car is a Tesla and is eligible for resale.",
                 icon="✅"
             )
-            st.write(f"Confidence: {result['brand_result']['score']:.4f}")
-            st.write(f"Detected brand label: {result['brand_result']['label']}")
 
         st.subheader("Tesla Model Detection")
         st.write(f"Detected model label: {result['detected_model_raw']}")
