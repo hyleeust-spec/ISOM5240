@@ -119,6 +119,11 @@ def car_brand(valid_path):
     return detected_car_brand
 
 
+def is_tesla_label(label):
+    normalized = str(label).strip().lower().replace("_", " ").replace("-", " ")
+    return "tesla" in normalized
+
+
 def tesla_model_type(valid_path):
     tesla_model_classifier = load_tesla_model_classifier()
     tesla_model_results = tesla_model_classifier(valid_path)
@@ -189,7 +194,7 @@ def analyze_uploaded_image(uploaded_file, df):
         }
 
     brand_result = car_brand(temp_path)
-    if brand_result["label"] != "Tesla Electric Car":
+    if not is_tesla_label(brand_result["label"]):
         return {
             "status": "not_tesla",
             "damage_result": damage_result,
@@ -277,6 +282,7 @@ def main():
                 icon="⚠️"
             )
             st.write(f"Confidence: {result['brand_result']['score']:.4f}")
+            st.write(f"Detected brand label: {result['brand_result']['label']}")
             return
         else:
             st.success(
@@ -284,6 +290,7 @@ def main():
                 icon="✅"
             )
             st.write(f"Confidence: {result['brand_result']['score']:.4f}")
+            st.write(f"Detected brand label: {result['brand_result']['label']}")
 
         st.subheader("Tesla Model Detection")
         st.write(f"Detected model label: {result['detected_model_raw']}")
