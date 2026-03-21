@@ -311,7 +311,6 @@ def main():
 
             st.write(f"Model: {result['detected_model']}")
             st.write(f"Year: {selected_year}")
-            st.write(f"Matching records: {len(matched_rows)}")
             st.success(f"Price range: HKD {int(min_price):,} - {int(max_price):,}", icon="✅")
 
 
