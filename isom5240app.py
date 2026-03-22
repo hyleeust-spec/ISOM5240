@@ -295,9 +295,7 @@ def main():
             )
 
         st.subheader("Tesla Model Detection")
-        st.write(f"Detected model label: {result['detected_model_raw']}")
-        st.write(f"Mapped model: {result['detected_model']}")
-        st.write(f"Confidence: {result['model_info']['score']:.4f}")
+        st.write(f"Detected model: {result['detected_model]}")
 
         if not result["available_years"]:
             st.warning(f"No available years found in the resale file for {result['detected_model']}.")
