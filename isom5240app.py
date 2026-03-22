@@ -223,9 +223,10 @@ def main():
     st.write("")
     st.success("""
     Tesla Resell Program Policy:
-    1. Only vehicles in good condition are eligible for our resale program.
-    2. Only Tesla vehicles (excluding Cybertruck) qualify for resale under this program.
-    3. The price shown is an initial estimate only. For more details or to receive a final resale offer, please contact our team.
+    1. Only cas in good condition are eligible for our resale program.
+    2. Only Tesla cars qualify for resale under this program.
+    3. Eligible Tesla models include: Model S, Model 3, Model X, and Model Y.
+    4. The price shown is an initial estimate only. For more details or to receive a final resale offer, please contact our team.
     """)
     
     try:
