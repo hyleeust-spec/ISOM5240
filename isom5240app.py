@@ -296,7 +296,7 @@ def main():
 
         st.subheader("Tesla Model Detection")
         st.success(
-            f"Nice - Your Tesla is a **{result['detected_model']}**",
+            f"Nice - Your Tesla is a **{result['detected_model']}** !!!",
             icon="✅")
 
         if not result["available_years"]:
