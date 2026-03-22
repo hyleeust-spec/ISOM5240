@@ -219,8 +219,10 @@ def analyze_uploaded_image(uploaded_file, df):
 def main():
     st.set_page_config(page_title="Tesla Resell Price Finder", layout="wide")
     st.title("Tesla Resell Price Finder")
-    st.write("Upload a car image, and the app will automatically detect the Tesla model and show the price range.")
-
+    st.write("Upload a photo of your car — we’ll instantly identify the Tesla model and show you the estimated price range!")
+    st.write("")
+    st.write("Tesla Resell Program Policy:")
+    
     try:
         df = load_data(FILE_PATH)
     except Exception as e:
@@ -276,7 +278,7 @@ def main():
 
         if result["status"] == "not_tesla":
             st.warning(
-                "We regret to inform you that your vehicle did not pass the brand detection check, as it does not appear to be a Tesla model. It is not eligible for resale through our program",
+                "We regret to inform you that your vehicle did not pass the brand detection check, as it does not appear to be a Tesla model. It is not eligible for resale through our program.",
                 icon="⚠️"
             )
             return
