@@ -314,7 +314,7 @@ def main():
         if selected_year is not None:
             min_price, max_price, matched_rows = get_price_range(df, result["detected_model"], selected_year)
 
-            st.subheader("Resale Price Result")
+            st.subheader("Resale Price Estimation")
 
             if matched_rows.empty:
                 st.warning("No matching rows found.")
