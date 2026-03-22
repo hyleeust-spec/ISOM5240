@@ -217,16 +217,16 @@ def analyze_uploaded_image(uploaded_file, df):
 
 
 def main():
-    st.set_page_config(page_title="Tesla Resell Price Finder", layout="wide")
-    st.title("Tesla Resell Price Finder")
+    st.set_page_config(page_title="Tesla Resale Price Estimator", layout="wide")
+    st.title("Tesla Resale Price Estimator")
     st.write("Upload a photo of your car — we’ll instantly identify the Tesla model and show you the estimated price range!")
     st.write("")
     st.success("""
     Tesla Resell Program Policy:
     1. Only cas in good condition are eligible for our resale program.
-    2. Only Tesla cars qualify for resale under this program.
-    3. Eligible Tesla models include: Model S, Model 3, Model X, and Model Y.
-    4. The price shown is an initial estimate only. For more details or to receive a final resale offer, please contact our team via apacpress@tesla.com.
+    2. Only Tesla cars qualify for our resale program.
+    3. Eligible Tesla models for our resale program include: Model S, Model 3, Model X, and Model Y.
+    4. The price shown is an initial estimation only. For more details or to receive a final resale offer, please contact our team via apacpress@tesla.com.
     """)
     
     try:
