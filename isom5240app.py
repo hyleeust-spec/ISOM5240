@@ -269,7 +269,7 @@ def main():
             return
         else:
             st.success(
-                "Your car passed the Damage Detection Validation successfully.",
+                "Great news — your Tesla is eligible for resale!"",
                 icon="✅"
             )
 
