@@ -269,7 +269,7 @@ def main():
             return
         else:
             st.success(
-                "Perfect!!! Your car is in good condition with no damage and is eligible for resale!!!",
+                "Perfect - Your car is in good condition with no damage and is eligible for resale!!!",
                 icon="✅"
             )
 
@@ -284,7 +284,7 @@ def main():
             return
         else:
             st.success(
-                "Great news!!! Your Tesla is eligible for resale!!!",
+                "Great news - Your Tesla is eligible for resale!!!",
                 icon="✅"
             )
 
