@@ -269,7 +269,7 @@ def main():
             return
         else:
             st.success(
-                "Great news — your Tesla is eligible for resale!"",
+                "Great news — your Tesla is eligible for resale!",
                 icon="✅"
             )
 
