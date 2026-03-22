@@ -262,8 +262,7 @@ def main():
 
         if result["status"] == "damaged":
             st.warning(
-                "Your car failed the Damage Detection Validation.\n"
-                "This car is damaged. It may not be eligible for resale.",
+                "We regret to inform you that your car did not pass the damage detection check. It is not eligible for resale through our program.",
                 icon="⚠️"
             )
             return
@@ -277,8 +276,7 @@ def main():
 
         if result["status"] == "not_tesla":
             st.warning(
-                "Your car failed the Brand Detection Validation.\n"
-                "Your car is not a Tesla car and is not eligible for resale.",
+                "We regret to inform you that your vehicle did not pass the brand detection check, as it does not appear to be a Tesla model. It is not eligible for resale through our program",
                 icon="⚠️"
             )
             return
