@@ -221,7 +221,12 @@ def main():
     st.title("Tesla Resell Price Finder")
     st.write("Upload a photo of your car — we’ll instantly identify the Tesla model and show you the estimated price range!")
     st.write("")
-    st.write("Tesla Resell Program Policy:")
+    st.success("""
+    Tesla Resell Program Policy:
+    1. Only vehicles in good condition are eligible for our resale program.
+    2. Only Tesla vehicles (excluding Cybertruck) qualify for resale under this program.
+    3. The price shown is an initial estimate only. For more details or to receive a final resale offer, please contact our team.
+    """)
     
     try:
         df = load_data(FILE_PATH)
