@@ -304,7 +304,7 @@ def main():
             return
 
         selected_year = st.selectbox(
-            "Select year",
+            "Please select the manufacturing year of your Tesla Car.",
             options=result["available_years"],
             index=None,
             placeholder="Choose a year",
@@ -320,8 +320,6 @@ def main():
                 st.warning("No matching rows found.")
                 return
 
-            st.write(f"Model: {result['detected_model']}")
-            st.write(f"Year: {selected_year}")
             st.success(f"Price range: HKD {int(min_price):,} - {int(max_price):,}", icon="✅")
 
 
