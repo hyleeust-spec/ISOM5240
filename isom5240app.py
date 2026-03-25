@@ -1,4 +1,5 @@
 import hashlib
+import re
 import tempfile
 import pandas as pd
 import streamlit as st
@@ -97,6 +98,11 @@ def get_file_hash(uploaded_file):
     file_bytes = uploaded_file.getvalue()
     uploaded_file.seek(0)
     return hashlib.md5(file_bytes).hexdigest()
+
+
+def is_valid_email(email):
+    pattern = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
+    return bool(re.match(pattern, email.strip()))
 
 
 def check_car_damage(valid_path):
@@ -238,7 +244,7 @@ def main():
     1. Only cars in good condition are eligible for our resale program.
     2. Only Tesla cars qualify for our resale program.
     3. Eligible Tesla models for our resale program include: Model S, Model 3, Model X, and Model Y.
-    4. The price shown is an initial estimation only. For more details or to receive a final resale offer, please contact our team via [apacpress@tesla.com](mailto:apacpress@tesla.com).
+    4. The price shown is an initial estimation only. For more details or to receive a final resale offer, please contact our team.
     """)
 
     try:
@@ -339,6 +345,25 @@ def main():
                 f"Estimated price range: HKD {int(min_price):,} - {int(max_price):,}",
                 icon="✅"
             )
+
+            st.subheader("Resale Application")
+
+            with st.form("resale_application_form"):
+                applicant_email = st.text_input(
+                    "Leave your email",
+                    placeholder="Enter your email address"
+                )
+                submitted = st.form_submit_button("Submit Application")
+
+            if submitted:
+                if not applicant_email.strip():
+                    st.error("Please enter your email address.")
+                elif not is_valid_email(applicant_email):
+                    st.error("Please enter a valid email address.")
+                else:
+                    st.success(
+                        f"Application submitted successfully! We will contact you at {applicant_email} soon."
+                    )
 
 
 if __name__ == "__main__":
