@@ -169,18 +169,30 @@ def get_available_years(df, model_name):
     return years
 
 
-def get_price_range(df, model_name, year):
+def get_trimmed_price_range(df, model_name, year):
     matched_rows = df[
         (df["model"].str.upper().str.contains(model_name.upper(), na=False)) &
         (df["year"] == int(year))
-    ]
+    ].copy()
 
     if matched_rows.empty:
         return None, None, matched_rows
 
-    min_price = matched_rows["pricehkd"].min()
-    max_price = matched_rows["pricehkd"].max()
-    return min_price, max_price, matched_rows
+    q1 = matched_rows["pricehkd"].quantile(0.25)
+    q3 = matched_rows["pricehkd"].quantile(0.75)
+
+    trimmed_rows = matched_rows[
+        (matched_rows["pricehkd"] >= q1) &
+        (matched_rows["pricehkd"] <= q3)
+    ]
+
+    if trimmed_rows.empty:
+        return None, None, trimmed_rows
+
+    min_price = trimmed_rows["pricehkd"].min()
+    max_price = trimmed_rows["pricehkd"].max()
+
+    return min_price, max_price, trimmed_rows
 
 
 def analyze_uploaded_image(uploaded_file, df):
@@ -223,12 +235,12 @@ def main():
     st.write("")
     st.success("""
     Tesla Resell Program Policy:
-    1. Only cas in good condition are eligible for our resale program.
+    1. Only cars in good condition are eligible for our resale program.
     2. Only Tesla cars qualify for our resale program.
     3. Eligible Tesla models for our resale program include: Model S, Model 3, Model X, and Model Y.
-    4. The price shown is an initial estimation only. For more details or to receive a final resale offer, please contact our team via apacpress@tesla.com.
+    4. The price shown is an initial estimation only. For more details or to receive a final resale offer, please contact our team via [apacpress@tesla.com](mailto:apacpress@tesla.com).
     """)
-    
+
     try:
         df = load_data(FILE_PATH)
     except Exception as e:
@@ -276,7 +288,7 @@ def main():
             return
         else:
             st.success(
-                "Perfect - Your car is in good condition with no damage and is eligible for resale!!!",
+                "Perfect - Your car is in good condition with no damage and is eligible for resale!",
                 icon="✅"
             )
 
@@ -290,14 +302,15 @@ def main():
             return
         else:
             st.success(
-                "Great news - Your Tesla is eligible for resale!!!",
+                "Great news - Your Tesla is eligible for resale!",
                 icon="✅"
             )
 
         st.subheader("Tesla Model Detection")
         st.success(
-            f"Nice - Your Tesla is a **{result['detected_model']}** !!!",
-            icon="✅")
+            f"Nice - Your Tesla is a **{result['detected_model']}**!",
+            icon="✅"
+        )
 
         if not result["available_years"]:
             st.warning(f"No available years found in the resale file for {result['detected_model']}.")
@@ -312,15 +325,20 @@ def main():
         )
 
         if selected_year is not None:
-            min_price, max_price, matched_rows = get_price_range(df, result["detected_model"], selected_year)
+            min_price, max_price, matched_rows = get_trimmed_price_range(
+                df, result["detected_model"], selected_year
+            )
 
             st.subheader("Resale Price Estimation")
 
             if matched_rows.empty:
-                st.warning("No matching rows found.")
+                st.warning("No matching rows found after removing the lowest and highest quartiles.")
                 return
 
-            st.success(f"Price range: HKD {int(min_price):,} - {int(max_price):,}", icon="✅")
+            st.success(
+                f"Estimated price range: HKD {int(min_price):,} - {int(max_price):,}",
+                icon="✅"
+            )
 
 
 if __name__ == "__main__":
